@@ -4,3 +4,4 @@ quart
 uvicorn
 pretty-html-table
 pygments
+framework==2.0.0
