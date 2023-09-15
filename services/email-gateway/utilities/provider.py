@@ -1,12 +1,11 @@
+from httpx import AsyncClient
 from clients.email_client import EmailClient
 from clients.sib_client import SendInBlueClient
-from framework.abstractions.abstract_request import RequestContextProvider
 from framework.auth.azure import AzureAd
 from framework.auth.configuration import AzureAdConfiguration
 from framework.clients.feature_client import FeatureClientAsync
 from framework.clients.http_client import HttpClient
 from framework.configuration.configuration import Configuration
-from quart import Quart, request
 from services.email_service import EmailService
 from framework.di.service_collection import ServiceCollection
 from framework.di.static_provider import ProviderBase
@@ -32,6 +31,12 @@ def configure_azure_ad(container):
         func=lambda t: AdRole.SEND in t.get('roles'))
 
     return azure_ad
+
+
+def configure_http_client(
+    container: ServiceCollection
+):
+    return AsyncClient(timeout=None)
 
 
 class ContainerProvider(ProviderBase):
