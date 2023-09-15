@@ -1,14 +1,14 @@
-from httpx import AsyncClient
-from clients.email_client import EmailClient
-from clients.sib_client import SendInBlueClient
 from framework.auth.azure import AzureAd
 from framework.auth.configuration import AzureAdConfiguration
 from framework.clients.feature_client import FeatureClientAsync
-from framework.clients.http_client import HttpClient
 from framework.configuration.configuration import Configuration
-from services.email_service import EmailService
 from framework.di.service_collection import ServiceCollection
 from framework.di.static_provider import ProviderBase
+from httpx import AsyncClient
+
+from clients.email_client import EmailClient
+from clients.sib_client import SendInBlueClient
+from services.email_service import EmailService
 
 
 class AdRole:
@@ -40,20 +40,24 @@ def configure_http_client(
 
 
 class ContainerProvider(ProviderBase):
-
     @classmethod
     def configure_container(cls):
-        container = ServiceCollection()
-        container.add_singleton(Configuration)
-        container.add_singleton(FeatureClientAsync)
+        descriptors = ServiceCollection()
 
-        container.add_singleton(
+        descriptors.add_singleton(Configuration)
+        descriptors.add_singleton(FeatureClientAsync)
+
+        descriptors.add_singleton(
             dependency_type=AzureAd,
             factory=configure_azure_ad)
 
-        container.add_singleton(EmailClient)
-        container.add_singleton(SendInBlueClient)
+        descriptors.add_singleton(
+            dependency_type=AsyncClient,
+            factory=configure_http_client)
 
-        container.add_transient(EmailService)
+        descriptors.add_singleton(EmailClient)
+        descriptors.add_singleton(SendInBlueClient)
 
-        return container
+        descriptors.add_transient(EmailService)
+
+        return descriptors
