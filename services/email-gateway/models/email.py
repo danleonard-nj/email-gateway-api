@@ -1,6 +1,3 @@
-from framework.utilities.pinq import any
-
-
 class Request:
     def validate(self):
         pass
@@ -45,11 +42,13 @@ class SendEmailRequest(Request):
         self.title = data.get('title')
 
     def validate(self):
-        return not any([
-            self.recipient,
-            self.subject,
-            self.body], lambda x: x is None
-        )
+        for value in [self.recipient,
+                      self.subject,
+                      self.body]:
+
+            if value is None:
+                return False
+        return True
 
 
 class SendDataTableEmailRequest(Request):
@@ -60,10 +59,12 @@ class SendDataTableEmailRequest(Request):
         self.style = data.get('style')
 
     def validate(self):
-        return not any([
-            self.recipient,
-            self.subject
-        ], lambda x: x is None)
+        for value in [self.recipient,
+                      self.subject]:
+
+            if value is None:
+                return False
+        return True
 
 
 class SendDataJsonEmailRequest(Request):
@@ -74,8 +75,10 @@ class SendDataJsonEmailRequest(Request):
         self.style = data.get('style')
 
     def validate(self):
-        return not any([
-            self.recipient,
-            self.subject,
-            self.json
-        ], lambda x: x is None)
+        for value in [self.recipient,
+                      self.subject,
+                      self.json]:
+
+            if value is None:
+                return False
+        return True
