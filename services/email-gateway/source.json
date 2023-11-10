@@ -1,6 +1,0 @@
-[
-  {
-    "source": "configs/gateway/email-gateway/config.json",
-    "target": "./services/email-gateway/config.json"
-  }
-]
