@@ -2,11 +2,11 @@ from typing import Dict
 
 import pandas as pd
 from clients.sib_client import SendInBlueClient
+from domain.email import (EmailRecipient, EmailRequest,
+                          GetStyleOptionsResponse, SendDataJsonEmailRequest,
+                          SendDataTableEmailRequest, SendEmailRequest)
 from framework.logger.providers import get_logger
 from framework.serialization.utilities import serialize
-from models.email import (EmailRecipient, EmailRequest,
-                          SendDataJsonEmailRequest, SendDataTableEmailRequest,
-                          SendEmailRequest)
 from pygments.styles import get_all_styles
 from utilities.formatter import Formatter
 
@@ -18,10 +18,10 @@ class EmailService:
         self,
         client: SendInBlueClient
     ):
-        self.__client = client
-        self.__formatter = Formatter()
+        self._client = client
+        self._formatter = Formatter()
 
-    def __get_client_request(
+    def _get_client_request(
         self,
         request: SendEmailRequest,
         content
@@ -39,12 +39,12 @@ class EmailService:
     ) -> Dict:
         logger.info(f'Sending email: {serialize(request.to_dict())}')
 
-        html = self.__formatter.format_email(
+        html = self._formatter.format_email(
             email_content=request.body,
             title=request.title)
 
-        result = await self.__client.send_email(
-            email=self.__get_client_request(
+        result = await self._client.send_email(
+            email=self._get_client_request(
                 request=request,
                 content=html))
 
@@ -56,15 +56,14 @@ class EmailService:
         self,
         request: SendDataTableEmailRequest
     ) -> Dict:
-        logger.info(
-            f'Sending data table email: {request.recipient}')
+        logger.info(f'Sending data table email: {request.recipient}')
 
-        table = self.__formatter.format_table(
+        table = self._formatter.format_table(
             df=pd.DataFrame(request.table),
             style=request.style)
 
-        return await self.__client.send_email(
-            email=self.__get_client_request(
+        return await self._client.send_email(
+            email=self._get_client_request(
                 request=request,
                 content=table))
 
@@ -72,22 +71,21 @@ class EmailService:
         self,
         request: SendDataJsonEmailRequest
     ) -> Dict:
-        logger.info(
-            f'Sending JSON email: {request.recipient}')
+        logger.info(f'Sending JSON email: {request.recipient}')
 
-        content = self.__formatter.format_json(
+        content = self._formatter.format_json(
             data=request.json,
             style=request.style)
 
-        return await self.__client.send_email(
-            email=self.__get_client_request(
+        return await self._client.send_email(
+            email=self._get_client_request(
                 request=request,
                 content=content))
 
     def get_style_options(
         self
-    ) -> Dict:
-        return {
-            'table_styles': self.__formatter.valid_styles,
-            'json_styles': list(get_all_styles())
-        }
+    ) -> GetStyleOptionsResponse:
+
+        return GetStyleOptionsResponse(
+            table_styles=self._formatter.valid_styles,
+            json_styles=list(get_all_styles()))

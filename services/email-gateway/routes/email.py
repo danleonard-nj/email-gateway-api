@@ -1,9 +1,10 @@
 from constants.features import Feature
 from framework.clients.feature_client import FeatureClientAsync
+from framework.exceptions.rest import HttpException
 from framework.rest.blueprints.meta import MetaBlueprint
-from models.email import (SendDataJsonEmailRequest, SendDataTableEmailRequest,
+from domain.email import (SendDataJsonEmailRequest, SendDataTableEmailRequest,
                           SendEmailRequest)
-from quart import abort, request
+from quart import request
 from services.email_service import EmailService
 
 email_bp = MetaBlueprint('email_bp', __name__)
@@ -20,11 +21,15 @@ async def post_email_send(container):
             Feature.EMAIL)
 
     body = await request.get_json()
+
+    if body is None:
+        raise HttpException('Request body is required', 400)
+
     email = SendEmailRequest(
         data=body)
 
     if not email.validate():
-        abort(404)
+        raise HttpException('Invalid request', 400)
 
     return await email_service.send_email(
         request=email)
@@ -46,7 +51,7 @@ async def post_email_datatable(container):
         data=body)
 
     if not email.validate():
-        abort(404)
+        raise HttpException('Invalid request', 400)
 
     return await email_service.send_data_table_email(
         request=email)
@@ -68,7 +73,7 @@ async def post_email_json(container):
         data=body)
 
     if not email.validate():
-        abort(404)
+        raise HttpException('Invalid request', 400)
 
     return await email_service.send_json_email(
         request=email)
@@ -76,7 +81,6 @@ async def post_email_json(container):
 
 @email_bp.configure('/api/email/styles', methods=['GET'], auth_scheme='send')
 async def get_email_styles(container):
-    email_service: EmailService = container.resolve(
-        EmailService)
+    email_service: EmailService = container.resolve(EmailService)
 
     return email_service.get_style_options()

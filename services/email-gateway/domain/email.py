@@ -1,3 +1,6 @@
+from framework.serialization import Serializable
+
+
 class Request:
     def validate(self):
         pass
@@ -82,3 +85,23 @@ class SendDataJsonEmailRequest(Request):
             if value is None:
                 return False
         return True
+
+
+class SendEmailResponse(Serializable):
+    def __init__(
+        self,
+        response: dict,
+        content: dict
+    ):
+        self.response = response
+        self.content = content
+
+
+class GetStyleOptionsResponse(Serializable):
+    def __init__(
+        self,
+        table_styles: list,
+        json_styles: list
+    ):
+        self.table_styles = table_styles
+        self.json_styles = json_styles

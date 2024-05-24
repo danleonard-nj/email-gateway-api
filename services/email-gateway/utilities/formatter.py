@@ -1,7 +1,8 @@
 
 import json
 
-from models.formatter import FormatDefault
+import pandas as pd
+from domain.formatter import FormatDefault
 from pretty_html_table import build_table
 from pretty_html_table.pretty_html_table import dict_colors
 from pygments import highlight
@@ -10,17 +11,18 @@ from pygments.lexers import JsonLexer
 
 
 class Formatter:
-    def __init__(self):
+    def __init__(
+        self
+    ):
         self.valid_styles = list(dict_colors.keys())
 
     def format_json(
         self,
-        data,
-        style
-    ):
+        data: dict,
+        style: str
+    ) -> str:
         json_style = style or FormatDefault.JSON
-        content = json.dumps(
-            data, indent=4, sort_keys=True)
+        content = json.dumps(data, indent=4, sort_keys=True)
 
         formatter = HtmlFormatter(
             style=json_style,
@@ -33,7 +35,11 @@ class Formatter:
 
         return json_html
 
-    def format_table(self, df, style, title='Kube-Tools'):
+    def format_table(
+        self,
+        df: pd.DataFrame,
+        style: str
+    ) -> str:
         email_style = style or FormatDefault.TABLE
 
         if email_style not in self.valid_styles:
@@ -42,16 +48,17 @@ class Formatter:
                 f"'{email_style}' is not a valid style choice: {choices}")
 
         table_html = build_table(
-            df, email_style)
+            df=df,
+            color=email_style)
 
         return table_html
 
     def format_email(
         self,
-        email_content,
-        title=None,
-        template='template.html'
-    ):
+        email_content: str,
+        title: str = None,
+        template: str = 'template.html'
+    ) -> str:
         with open(f'./resources/{template}', 'r') as file:
             content = file.read()
 
@@ -70,10 +77,10 @@ class Formatter:
 
     def replace_field(
         self,
-        template,
-        field_name,
-        content
-    ):
+        template: str,
+        field_name: str,
+        content: str
+    ) -> str:
         segments = template.split(
             field_name)
 
